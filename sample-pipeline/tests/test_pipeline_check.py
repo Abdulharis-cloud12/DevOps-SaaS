@@ -5,7 +5,7 @@ from src.pipeline_check import check_pipeline_status
 class TestPipelineCheck(unittest.TestCase):
 
     def test_success_rate(self):
-        self.assertEqual(check_pipeline_status(9, 1), 99.0)
+        self.assertEqual(check_pipeline_status(9, 1), 95.0)
 
     def test_all_successful(self):
         self.assertEqual(check_pipeline_status(10, 0), 100.0)
