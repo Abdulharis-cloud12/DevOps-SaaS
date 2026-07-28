@@ -1,0 +1,68 @@
+pipeline {
+
+    agent any
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Validate') {
+            steps {
+                sh '''
+                    echo "Validating Python source..."
+                    python3 -m py_compile sample-pipeline/src/pipeline_check.py
+                '''
+            }
+        }
+
+        stage('Test') {
+            steps {
+                dir('sample-pipeline') {
+                    sh '''
+                        echo "Running automated tests..."
+                        python3 -m unittest discover -s tests
+                    '''
+                }
+            }
+        }
+
+        stage('Package') {
+            steps {
+                sh '''
+                    echo "Packaging sample workload..."
+                    mkdir -p build
+                    tar -czf build/sample-pipeline.tar.gz sample-pipeline/src
+                '''
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                sh '''
+                    echo "Simulating deployment..."
+                    sleep 2
+                    echo "Deployment successful."
+                '''
+            }
+        }
+    }
+
+    post {
+
+        success {
+            echo 'PIPELINE STATUS: SUCCESS'
+        }
+
+        failure {
+            echo 'PIPELINE STATUS: FAILED'
+        }
+
+        always {
+            echo 'Pipeline execution completed.'
+        }
+    }
+}
