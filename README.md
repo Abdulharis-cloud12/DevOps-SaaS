@@ -35,9 +35,10 @@ The platform collects pipeline execution data from CI/CD systems such as Jenkins
 
 🚧 Under active development.
 
-Active Phase: Phase 3 — Pipeline Pulse Collector ...
+Active Phase: Phase 4 —  ...
 
 ## Phase Completed: 
 
 - Phase 1 — Project Foundation
 - Phase 2 — Build Jenkins CI/CD Pipeline
+- Phase 3 — Pipeline Pulse Collector
