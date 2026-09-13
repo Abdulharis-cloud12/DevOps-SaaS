@@ -38,6 +38,10 @@ def collect_recent_builds(limit=10):
     for build_reference in job.get("builds", [])[:limit]:
         build = get_build_info(build_reference["number"])
 
+        # Skip builds that are still running.
+        if build.get("result") is None:
+            continue
+
         normalized_builds.append(
             normalize_build(job["name"], build)
         )

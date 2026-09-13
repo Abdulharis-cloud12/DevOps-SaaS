@@ -55,7 +55,8 @@ def insert_build(
                 )
                 VALUES (%s, %s, %s, %s, %s, %s)
                 ON CONFLICT (pipeline_id, build_number)
-                DO NOTHING;
+                DO NOTHING
+                RETURNING build_id;
                 """,
                 (
                     pipeline_id,
@@ -67,11 +68,55 @@ def insert_build(
                 )
             )
 
+            result = cursor.fetchone()
+
         connection.commit()
+
+        return result is not None
 
     except Exception:
         connection.rollback()
         raise
+
+    finally:
+        connection.close()
+
+def get_all_builds():
+    connection = get_connection()
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT
+                    p.name,
+                    p.provider,
+                    b.build_number,
+                    b.status,
+                    b.duration_seconds,
+                    b.timestamp,
+                    b.url
+                FROM builds b
+                JOIN pipelines p
+                    ON b.pipeline_id = p.pipeline_id
+                ORDER BY b.build_number;
+                """
+            )
+
+            rows = cursor.fetchall()
+
+            return [
+                {
+                    "pipeline": row[0],
+                    "provider": row[1],
+                    "build_number": row[2],
+                    "status": row[3],
+                    "duration_seconds": row[4],
+                    "timestamp": row[5].isoformat(),
+                    "url": row[6]
+                }
+                for row in rows
+            ]
 
     finally:
         connection.close()
