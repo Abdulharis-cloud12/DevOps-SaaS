@@ -35,7 +35,7 @@ The platform collects pipeline execution data from CI/CD systems such as Jenkins
 
 🚧 Under active development.
 
-Active Phase: Phase 6 —  Grafana Dashboard...
+Active Phase: Phase 7 —  Prometheus Alertmanager...
 
 ## Phase Completed: 
 
@@ -44,3 +44,4 @@ Active Phase: Phase 6 —  Grafana Dashboard...
 - Phase 3 — Pipeline Pulse Collector
 - Phase 4 — PostgreSQL Historical Data Storage
 - Phase 5 — Prometheus Metrics
+- Phase 6 — Grafana Dashboard
