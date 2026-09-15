@@ -35,7 +35,7 @@ The platform collects pipeline execution data from CI/CD systems such as Jenkins
 
 🚧 Under active development.
 
-Active Phase: Phase 7 —  Prometheus Alertmanager...
+Active Phase: Phase 8 —  Dockerization & Docker Compose...
 
 ## Phase Completed: 
 
@@ -45,3 +45,4 @@ Active Phase: Phase 7 —  Prometheus Alertmanager...
 - Phase 4 — PostgreSQL Historical Data Storage
 - Phase 5 — Prometheus Metrics
 - Phase 6 — Grafana Dashboard
+- Phase 7 — Prometheus Alertmanager
