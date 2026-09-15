@@ -52,3 +52,9 @@ pipeline_last_duration_seconds = Gauge(
     "Duration of the most recently detected pipeline run in seconds",
     ["pipeline", "provider"]
 )
+
+pipeline_last_failure_timestamp = Gauge(
+    "pipeline_last_failure_timestamp",
+    "Unix timestamp of the most recently detected failed pipeline run",
+    ["pipeline", "provider"]
+)
