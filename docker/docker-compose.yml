@@ -1,0 +1,126 @@
+services:
+
+  postgres:
+    image: postgres:16
+    container_name: pipelinepulse-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+
+  collector:
+    build:
+      context: ..
+      dockerfile: docker/collector/Dockerfile
+
+    container_name: pipelinepulse-collector
+    restart: unless-stopped
+
+    env_file:
+      - ../.env
+
+    environment:
+      POSTGRES_HOST: postgres
+      JENKINS_URL: http://host.docker.internal:8080
+
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+    ports:
+      - "8000:8000"
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: pipelinepulse-prometheus
+    restart: unless-stopped
+
+    ports:
+      - "9090:9090"
+
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/rules:/etc/prometheus/rules:ro
+      - prometheus_data:/prometheus
+
+    depends_on:
+      - collector
+
+
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: pipelinepulse-alertmanager
+    restart: unless-stopped
+
+    ports:
+      - "9093:9093"
+
+    volumes:
+      - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager_data:/alertmanager
+
+    command:
+      - "--config.file=/etc/alertmanager/alertmanager.yml"
+      - "--cluster.listen-address="
+
+    depends_on:
+      - prometheus
+
+
+  discord-adapter:
+    build:
+      context: ..
+      dockerfile: docker/discord-adapter/Dockerfile
+
+    container_name: pipelinepulse-discord-adapter
+    restart: unless-stopped
+
+    env_file:
+      - ../.env
+
+    ports:
+      - "5001:5001"
+
+    depends_on:
+      - alertmanager
+
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: pipelinepulse-grafana
+    restart: unless-stopped
+
+    ports:
+      - "3000:3000"
+
+    volumes:
+      - grafana_data:/var/lib/grafana
+
+    depends_on:
+      - prometheus
+
+
+volumes:
+  postgres_data:
+  prometheus_data:
+  alertmanager_data:
+  grafana_data:

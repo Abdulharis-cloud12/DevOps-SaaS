@@ -1,0 +1,22 @@
+groups:
+  - name: pipelinepulse_alerts
+    rules:
+
+      - alert: PipelineFailureDetected
+        expr: increase(pipeline_failure_events_total[5m]) > 0
+        for: 0m
+        labels:
+          severity: critical
+          team: devops
+        annotations:
+          summary: "Pipeline failure detected"
+          description: "Pipeline {{ $labels.pipeline }} on {{ $labels.provider }} has experienced a new failure."
+      - alert: PipelineFailureThresholdExceeded
+        expr: increase(pipeline_failure_events_total[1h]) >= 5
+        for: 5m
+        labels:
+          severity: critical
+          team: devops
+        annotations:
+          summary: "Pipeline failure threshold exceeded"
+          description: "Pipeline {{ $labels.pipeline }} on {{ $labels.provider }} has experienced 5 or more failures in the last hour."

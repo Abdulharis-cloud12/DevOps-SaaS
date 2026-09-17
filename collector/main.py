@@ -23,7 +23,7 @@ COLLECTION_INTERVAL = int(
 
 
 def collect_and_store():
-    builds = collect_recent_builds(limit=10)
+    builds = collect_recent_builds(limit=50)
 
     new_builds = 0
 
