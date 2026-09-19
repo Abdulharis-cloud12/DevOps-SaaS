@@ -1,14 +1,19 @@
+```python
 import os
-import sys
 import time
 
 import requests
 
-from collector.collector import collect_recent_builds
+from collector.collector import (
+    collect_recent_builds,
+    normalize_github_run,
+)
+from collector.github_actions_client import get_workflow_runs
 from collector.metrics_server import (
     start_metrics_server,
     record_build,
     initialize_metrics,
+    record_build_update,
 )
 from database.queries import (
     get_or_create_pipeline,
@@ -26,6 +31,7 @@ def collect_and_store():
     builds = collect_recent_builds(limit=50)
 
     new_builds = 0
+    updated_builds = 0
 
     for build in builds:
         pipeline_id = get_or_create_pipeline(
@@ -33,7 +39,7 @@ def collect_and_store():
             build["provider"]
         )
 
-        inserted = insert_build(
+        action, previous_status = insert_build(
             pipeline_id=pipeline_id,
             build_number=build["build_number"],
             status=build["status"],
@@ -42,13 +48,56 @@ def collect_and_store():
             url=build["url"]
         )
 
-        if inserted:
+        if action == "new":
             record_build(build)
             new_builds += 1
 
+        elif action == "updated":
+            record_build_update(build, previous_status)
+            updated_builds += 1
+
     print(
         f"Processed {len(builds)} Jenkins builds. "
-        f"New builds stored: {new_builds}"
+        f"New builds stored: {new_builds}, "
+        f"Updated builds: {updated_builds}"
+    )
+
+
+def collect_github_and_store():
+    runs = get_workflow_runs(limit=50)
+
+    new_runs = 0
+    updated_runs = 0
+
+    for run in runs:
+        build = normalize_github_run(run)
+
+        pipeline_id = get_or_create_pipeline(
+            build["pipeline"],
+            build["provider"]
+        )
+
+        action, previous_status = insert_build(
+            pipeline_id=pipeline_id,
+            build_number=build["build_number"],
+            status=build["status"],
+            duration_seconds=build["duration_seconds"],
+            timestamp=build["timestamp"],
+            url=build["url"]
+        )
+
+        if action == "new":
+            record_build(build)
+            new_runs += 1
+
+        elif action == "updated":
+            record_build_update(build, previous_status)
+            updated_runs += 1
+
+    print(
+        f"Processed {len(runs)} GitHub Actions runs. "
+        f"New runs stored: {new_runs}, "
+        f"Updated runs: {updated_runs}"
     )
 
 
@@ -61,16 +110,17 @@ def main():
     while True:
         try:
             collect_and_store()
+            collect_github_and_store()
 
         except requests.exceptions.ConnectionError:
-            print("ERROR: Unable to connect to Jenkins.")
+            print("ERROR: Unable to connect to CI provider.")
 
         except requests.exceptions.Timeout:
-            print("ERROR: Jenkins request timed out.")
+            print("ERROR: CI provider request timed out.")
 
         except requests.exceptions.HTTPError as error:
             print(
-                f"ERROR: Jenkins API returned an HTTP error: {error}"
+                f"ERROR: CI provider API returned an HTTP error: {error}"
             )
 
         except Exception as error:
@@ -81,3 +131,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+```
+

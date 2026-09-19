@@ -39,40 +39,93 @@ def insert_build(
     timestamp,
     url
 ):
+    """
+    Insert a new build or update an existing build when its
+    status changes.
+
+    Returns:
+        ("new", None)
+        ("updated", previous_status)
+        ("unchanged", previous_status)
+    """
+
     connection = get_connection()
 
     try:
         with connection.cursor() as cursor:
             cursor.execute(
                 """
-                INSERT INTO builds (
-                    pipeline_id,
-                    build_number,
-                    status,
-                    duration_seconds,
-                    timestamp,
-                    url
-                )
-                VALUES (%s, %s, %s, %s, %s, %s)
-                ON CONFLICT (pipeline_id, build_number)
-                DO NOTHING
-                RETURNING build_id;
+                SELECT status
+                FROM builds
+                WHERE pipeline_id = %s
+                  AND build_number = %s;
                 """,
-                (
-                    pipeline_id,
-                    build_number,
-                    status,
-                    duration_seconds,
-                    timestamp,
-                    url
-                )
+                (pipeline_id, build_number)
             )
 
-            result = cursor.fetchone()
+            existing = cursor.fetchone()
 
-        connection.commit()
+            # New pipeline run
+            if existing is None:
+                cursor.execute(
+                    """
+                    INSERT INTO builds (
+                        pipeline_id,
+                        build_number,
+                        status,
+                        duration_seconds,
+                        timestamp,
+                        url
+                    )
+                    VALUES (%s, %s, %s, %s, %s, %s);
+                    """,
+                    (
+                        pipeline_id,
+                        build_number,
+                        status,
+                        duration_seconds,
+                        timestamp,
+                        url
+                    )
+                )
 
-        return result is not None
+                connection.commit()
+
+                return "new", None
+
+            previous_status = existing[0]
+
+            # Existing run changed status
+            if previous_status != status:
+                cursor.execute(
+                    """
+                    UPDATE builds
+                    SET
+                        status = %s,
+                        duration_seconds = %s,
+                        timestamp = %s,
+                        url = %s
+                    WHERE pipeline_id = %s
+                      AND build_number = %s;
+                    """,
+                    (
+                        status,
+                        duration_seconds,
+                        timestamp,
+                        url,
+                        pipeline_id,
+                        build_number
+                    )
+                )
+
+                connection.commit()
+
+                return "updated", previous_status
+
+            # Nothing changed
+            connection.commit()
+
+            return "unchanged", previous_status
 
     except Exception:
         connection.rollback()
@@ -80,6 +133,7 @@ def insert_build(
 
     finally:
         connection.close()
+
 
 def get_all_builds():
     connection = get_connection()
@@ -120,3 +174,5 @@ def get_all_builds():
 
     finally:
         connection.close()
+```
+
