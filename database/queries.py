@@ -135,6 +135,7 @@ def insert_build(
         connection.close()
 
 
+
 def get_all_builds():
     connection = get_connection()
 
@@ -153,7 +154,7 @@ def get_all_builds():
                 FROM builds b
                 JOIN pipelines p
                     ON b.pipeline_id = p.pipeline_id
-                ORDER BY b.build_number;
+                ORDER BY p.provider, b.timestamp;
                 """
             )
 
@@ -174,5 +175,3 @@ def get_all_builds():
 
     finally:
         connection.close()
-```
-

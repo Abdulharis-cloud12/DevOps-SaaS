@@ -1,4 +1,3 @@
-```python
 from prometheus_client import start_http_server
 
 from collector.metrics import (
@@ -95,8 +94,6 @@ def record_build_update(build, previous_status):
     status = build["status"]
     duration = build["duration_seconds"]
 
-    # Only emit a final success/failure event when the run
-    # transitions into a final state.
     if status == "success" and previous_status != "success":
         pipeline_success_total.labels(
             pipeline=pipeline,
@@ -139,4 +136,3 @@ def initialize_metrics(builds):
 
     for build in builds:
         record_build(build, emit_event=False)
-```
