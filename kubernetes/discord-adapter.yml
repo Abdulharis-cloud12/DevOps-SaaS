@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: discord-adapter
+  namespace: pipelinepulse
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: discord-adapter
+  template:
+    metadata:
+      labels:
+        app: discord-adapter
+    spec:
+      containers:
+        - name: discord-adapter
+          image: pipelinepulse-discord-adapter:phase10
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5001
+
+          envFrom:
+            - secretRef:
+                name: pipelinepulse-secrets
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: discord-adapter
+  namespace: pipelinepulse
+spec:
+  selector:
+    app: discord-adapter
+  ports:
+    - port: 5001
+      targetPort: 5001
+  type: ClusterIP

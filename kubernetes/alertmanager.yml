@@ -1,0 +1,77 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alertmanager-config
+  namespace: pipelinepulse
+data:
+  alertmanager.yml: |
+    global:
+      resolve_timeout: 5m
+
+    route:
+      group_by: ['alertname']
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 1h
+      receiver: 'pipelinepulse'
+
+    receivers:
+      - name: 'pipelinepulse'
+        webhook_configs:
+          - url: 'http://discord-adapter:5001/'
+            send_resolved: true
+
+    inhibit_rules:
+      - source_matchers: [severity="critical"]
+        target_matchers: [severity="warning"]
+        equal: [alertname, dev, instance]
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alertmanager
+  namespace: pipelinepulse
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alertmanager
+  template:
+    metadata:
+      labels:
+        app: alertmanager
+    spec:
+      containers:
+        - name: alertmanager
+          image: prom/alertmanager:latest
+          ports:
+            - containerPort: 9093
+
+          args:
+            - "--config.file=/etc/alertmanager/alertmanager.yml"
+            - "--cluster.listen-address="
+
+          volumeMounts:
+            - name: config
+              mountPath: /etc/alertmanager/alertmanager.yml
+              subPath: alertmanager.yml
+
+      volumes:
+        - name: config
+          configMap:
+            name: alertmanager-config
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: alertmanager
+  namespace: pipelinepulse
+spec:
+  selector:
+    app: alertmanager
+  ports:
+    - port: 9093
+      targetPort: 9093
+  type: ClusterIP
