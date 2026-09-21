@@ -35,7 +35,7 @@ The platform collects pipeline execution data from CI/CD systems such as Jenkins
 
 🚧 Under active development.
 
-Active Phase: Phase 10 —  Kubernetes Deployment...
+Active Phase: Phase 11 —  Helm Packaging...
 
 ## Phase Completed: 
 
@@ -48,3 +48,4 @@ Active Phase: Phase 10 —  Kubernetes Deployment...
 - Phase 7 — Prometheus Alertmanager
 - Phase 8 — Dockerization & Docker Compose
 - Phase 9 — GitHub Actions Integration
+- Phase 10 — Kubernetes Deployment
