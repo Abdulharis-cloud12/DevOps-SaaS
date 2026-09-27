@@ -1,0 +1,34 @@
+collector:
+  replicaCount: 1
+  image:
+    repository: pipelinepulse-collector
+    tag: phase10
+
+discordAdapter:
+  replicaCount: 1
+  image:
+    repository: pipelinepulse-discord-adapter
+    tag: phase10
+
+postgres:
+  image:
+    repository: postgres
+    tag: "16"
+  storage: 5Gi
+
+prometheus:
+  image:
+    repository: prom/prometheus
+    tag: latest
+  storage: 5Gi
+
+alertmanager:
+  image:
+    repository: prom/alertmanager
+    tag: latest
+
+grafana:
+  image:
+    repository: grafana/grafana
+    tag: latest
+  storage: 5Gi
