@@ -9,17 +9,16 @@ from collector.collector import (
 )
 from collector.github_actions_client import get_workflow_runs
 from collector.metrics_server import (
-    start_metrics_server,
-    record_build,
     initialize_metrics,
+    record_build,
     record_build_update,
+    start_metrics_server,
 )
 from database.queries import (
+    get_all_builds,
     get_or_create_pipeline,
     insert_build,
-    get_all_builds,
 )
-
 
 COLLECTION_INTERVAL = int(
     os.getenv("COLLECTION_INTERVAL", "30")
@@ -122,7 +121,7 @@ def main():
                 f"ERROR: CI provider API returned an HTTP error: {error}"
             )
 
-        except Exception as error:
+        except Exception as error:  # noqa: BLE001
             print(f"ERROR: {error}")
 
         time.sleep(COLLECTION_INTERVAL)
