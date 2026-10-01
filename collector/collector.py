@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from collector.jenkins_client import get_job_info, get_build_info
+from collector.jenkins_client import get_build_info, get_job_info
 
 
 def normalize_build(job_name, build):
