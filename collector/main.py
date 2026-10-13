@@ -21,7 +21,7 @@ from collector.metrics_server import (
 )
 
 COLLECTION_INTERVAL = int(
-    os.getenv("COLLECTION_INTERVAL", "30")
+    os.getenv("COLLECTION_INTERVAL", "60")
 )
 
 
