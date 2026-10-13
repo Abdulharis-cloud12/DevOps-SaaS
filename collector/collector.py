@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from collector.jenkins_client import get_build_info, get_job_info
 
@@ -17,7 +17,7 @@ def normalize_build(job_name, build):
         ),
         "timestamp": datetime.fromtimestamp(
             build.get("timestamp", 0) / 1000,
-            tz=timezone.utc
+            tz=UTC
         ).isoformat(),
         "url": build.get("url"),
     }
