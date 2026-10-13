@@ -1,14 +1,14 @@
 from prometheus_client import start_http_server
 
 from collector.metrics import (
-    pipeline_runs_total,
-    pipeline_success_total,
-    pipeline_failure_total,
     pipeline_duration_seconds,
-    pipeline_run_events_total,
-    pipeline_success_events_total,
     pipeline_failure_events_total,
+    pipeline_failure_total,
     pipeline_last_duration_seconds,
+    pipeline_run_events_total,
+    pipeline_runs_total,
+    pipeline_success_events_total,
+    pipeline_success_total,
 )
 
 

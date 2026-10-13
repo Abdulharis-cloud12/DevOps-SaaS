@@ -1,6 +1,6 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
-from collector.jenkins_client import get_job_info, get_build_info
+from collector.jenkins_client import get_build_info, get_job_info
 
 
 def normalize_build(job_name, build):
@@ -17,7 +17,7 @@ def normalize_build(job_name, build):
         ),
         "timestamp": datetime.fromtimestamp(
             build.get("timestamp", 0) / 1000,
-            tz=timezone.utc
+            tz=UTC
         ).isoformat(),
         "url": build.get("url"),
     }
@@ -27,11 +27,11 @@ def normalize_github_run(run):
     """Normalize a GitHub Actions workflow run into the PipelinePulse build model."""
 
     started_at = datetime.fromisoformat(
-        run["run_started_at"].replace("Z", "+00:00")
+        run["run_started_at"]
     )
 
     updated_at = datetime.fromisoformat(
-        run["updated_at"].replace("Z", "+00:00")
+        run["updated_at"]
     )
 
     duration_seconds = round(

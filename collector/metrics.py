@@ -1,6 +1,5 @@
 from prometheus_client import Counter, Gauge, Histogram
 
-
 pipeline_runs_total = Counter(
     "pipeline_runs_total",
     "Total number of pipeline runs",
