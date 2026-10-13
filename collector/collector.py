@@ -27,11 +27,11 @@ def normalize_github_run(run):
     """Normalize a GitHub Actions workflow run into the PipelinePulse build model."""
 
     started_at = datetime.fromisoformat(
-        run["run_started_at"].replace("Z", "+00:00")
+        run["run_started_at"]
     )
 
     updated_at = datetime.fromisoformat(
-        run["updated_at"].replace("Z", "+00:00")
+        run["updated_at"]
     )
 
     duration_seconds = round(
