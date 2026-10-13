@@ -2,6 +2,11 @@ import os
 import time
 
 import requests
+from database.queries import (
+    get_all_builds,
+    get_or_create_pipeline,
+    insert_build,
+)
 
 from collector.collector import (
     collect_recent_builds,
@@ -13,11 +18,6 @@ from collector.metrics_server import (
     record_build,
     record_build_update,
     start_metrics_server,
-)
-from database.queries import (
-    get_all_builds,
-    get_or_create_pipeline,
-    insert_build,
 )
 
 COLLECTION_INTERVAL = int(
